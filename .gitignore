@@ -10,6 +10,8 @@ tmp/
 local.properties
 .settings/
 .loadpath
+.classpath
+.project
 
 # External tool builders
 .externalToolBuilders/
@@ -28,3 +30,4 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
