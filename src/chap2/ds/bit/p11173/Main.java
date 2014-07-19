@@ -1,4 +1,4 @@
-package chap2.basic.bit.p11173;
+package chap2.ds.bit.p11173;
 
 import java.io.BufferedReader;
 import java.io.IOException;
