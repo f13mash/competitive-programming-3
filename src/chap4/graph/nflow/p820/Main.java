@@ -106,25 +106,6 @@ public class Main {
       System.out.println();
 	  return 1;
 	}
-	public static Boolean recurse(int[][] mp, int curr, int des, List<Integer> path) {
-	  if(path.contains(curr))
-	    return false;
-	  //System.out.println(curr+" : "+des);
-	  path.add(curr);
-	  if(curr == des) {
-	    return true;
-	  }
-	  boolean found = false;
-	  for(int i = 0; i < mp.length && !found; i++) {
-	    if(mp[curr][i] > 0) {
-	      found = found || recurse(mp, i, des, path);
-	    }
-	    
-	  }
-	  if(!found)
-	    path.remove(path.size() - 1);
-	  return found;
-	}
 	
 	
 	public static class IntegerPair {

@@ -1,4 +1,4 @@
-package chap4.graph.nflow.p11167;
+package chap4.graph.nflow.var.p11380;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -46,8 +46,8 @@ public class Main {
         }
       } catch (Exception e) {
         // System.out.print(sb);
-        throw e;
-        // return;
+        //throw e;
+         return;
       }
 
 
@@ -61,187 +61,163 @@ public class Main {
   static Scanner scn = new Scanner(System.in);
 
   static int process() throws Exception {
-    int n = in.readInt();
-    if (n == 0)
-      return 0;
-    int m = in.readInt();
-    boolean[] arr = new boolean[50001];
-
-    Map<Integer, IntegerTriple> range = new HashMap<Integer, Main.IntegerTriple>();
-    for (int i = 0; i < n; i++) {
-      int v = in.readInt(), a = in.readInt(), b = in.readInt();
-      arr[a] = true;
-      arr[b] = true;
-      range.put(i, new IntegerTriple(a, b, v));
-    }
-    int k = 0;
-    Map<Integer, Integer> timeMap = new HashMap<Integer, Integer>();
-    List<Integer> indMap = new ArrayList<Integer>();
-    for (int i = 0; i < arr.length; i++) {
-      if (arr[i]) {
-        indMap.add(i);
-        timeMap.put(i, k++);
-      }
-    }
-
-    int len = k + n + 2;
-
-    int s = k, t = k + 1, base = k + 2;
-
-    int[][] mp = new int[len][len];
-    for (int i = 0; i < n; i++) {
-      mp[s][base + i] = range.get(i).c;
-      int a = range.get(i).a, b = range.get(i).b;
-      int stIndex = timeMap.get(a);
-      while (indMap.get(stIndex) != b) {
-        mp[base + i][stIndex] = indMap.get(stIndex + 1) - indMap.get(stIndex);
-        stIndex++;
-      }
-    }
-    for (int i = 0; i < (k - 1); i++) {
-      int diff = indMap.get(i + 1) - indMap.get(i);
-      mp[i][t] = diff * m;
-    }
-    //System.out.println(k);
-    int tot = dinicFlow(mp, s, t);
+    int x = in.readInt(), y = in.readInt(), p = in.readInt();
+    int[][][] mp = new int[x + 2][y + 2][2];
+    int cnt = 1;
     
-    //System.out.println(tot);
-    //for (int i = 0; i < mp.length; i++) {
-      //System.out.println(Arrays.toString(mp[i]));
-    //}
-    boolean success = true;
-    for(int i = 0; i < n; i++) {
-      if(mp[s][base + i] > 0) {
-        success = false;
-        break;
+    int[][] dat = new int[x + 2][y + 2];
+    for(int i = 1; i <= x; i++) {
+      char[] arr = in.readString().trim().toCharArray();
+      for(int j = 1; j <= y; j++) {
+        switch (arr[j-1]) {
+          case '*':
+            dat[i][j] = 1;
+            mp[i][j][0] = cnt++;
+            mp[i][j][1] = cnt++;
+            break;
+          case '.':
+            dat[i][j] = 2;
+            mp[i][j][0] = cnt++;
+            mp[i][j][1] = cnt++;
+            break;
+          case '@':
+            dat[i][j] = 3;
+            mp[i][j][0] = cnt++;
+            mp[i][j][1] = cnt++;
+            break;
+          case '#':
+            dat[i][j] = 4;
+            mp[i][j][0] = cnt++;
+            mp[i][j][1] = cnt++;
+            break;
+          default:
+            break;
+        }
       }
     }
-    int[] time = new int[50001];
-    Arrays.fill(time, m);
-    System.out.printf("Case %d: %s\n", casen++, success ? "Yes" : "No");
-    if(success) {
-      for(int i = 0; i < n; i++) {
-        int ii = base + i;
-        String str = "";
-        int cnts = 0;
-        List<Integer> pos = new ArrayList<Integer>();
-        for(int j = 0; j < (k-1); j++) {
-          if(mp[j][ii] > 0) {
-            int st = indMap.get(j), en = indMap.get(j + 1);
-            int qt = mp[j][ii];
-            int v = st;
-            for(; v < en && qt > 0; v++) {
-              if(time[v] > 0) {
-                time[v]--;
-                qt--;
-              }
-            }
-            if(pos.size() == 0 || pos.get(pos.size() - 1) != v - mp[j][ii]) {
-              cnts++;
-              pos.add(v - mp[j][ii]);
-              pos.add(v);
-            }
-            else {
-              pos.remove(pos.size() - 1);
-              pos.add(v);
-            }
-          }
+    int max = 100000000;
+    int bh = 0;
+    int src = cnt++, des = cnt++;
+    int[][] mat = new int[cnt][cnt];
+    int people = 0;
+    for(int i = 1; i <= x; i++) {
+      for(int j = 1; j <= y; j++) {
+        int in = mp[i][j][0], out = mp[i][j][1];
+        switch (dat[i][j]) {
+          case 1:
+            people++;
+            mat[src][in] = 1;
+            mat[in][src] = 1;
+            mat[in][out] = 1;
+            mat[out][in] = 1;
+            mp[i][j][0] = 0;
+            break;
+          case 2:
+            mat[in][out] = 1;
+            mat[out][in] = 1;
+            break;
+          case 3:
+            mat[in][out] = max;
+            mat[out][in] = max;
+            mat[out][des] = 0;
+            mat[des][out] = 0;
+            mp[i][j][1] = mp[i][j][0];
+            break;
+          case 4:
+            mat[in][out] = max;
+            mat[out][in] = max;
+            mat[out][des] = p;
+            mat[des][out] = p;
+            mp[i][j][1] = mp[i][j][0];
+            break;
+          default:
+            break;
         }
-        for(int j = 0; j < pos.size(); j+= 2) {
-          str += " ("+pos.get(j) +","+pos.get(j + 1)+")";
-        }
-        str = cnts +""+str;
-        System.out.println(str);
       }
     }
-
+    for(int i = 1; i <= x; i++) {
+      for(int j = 1; j <= y; j++) {
+        if(dat[i][j] == 0)
+          continue;
+        addEdge(mat, dat, mp, i, j, i-1, j);
+        addEdge(mat, dat, mp, i, j, i+1, j);
+        addEdge(mat, dat, mp, i, j, i, j-1);
+        addEdge(mat, dat, mp, i, j, i, j+1);
+      }
+    }
+//    for(int i = 0; i < mat.length; i++) {
+//      System.out.println(Arrays.toString(mat[i]));
+//    }
+    System.out.println(karpFlow(mat, src, des));
+    
     return 1;
   }
-
-
-  static int dinicFlow(int[][] mp, int s, int t) {
-    int totalFlow = 0, lastFlow = 0;
-    int mx = mp.length;
-    while(mx-- > 0) {
-      int[][] flow = new int[mp.length][mp.length];
-      
+  
+  static int karpFlow(int[][] mp, int s, int t) {
+    int flow = 0;
+    int nodes = mp.length;
+    while(true) {
       Queue<Integer> q = new LinkedList<Integer>();
-      q.add(s);
-      int disc = 1;
-      boolean[] vis = new boolean[mp.length];
-      vis[s] = true;
-      while(q.size() != 0 && disc > 0) {
-        Set<Integer> hs = new HashSet<Integer>();
-        while(q.size() > 0) {
-          int a = q.remove();
-          for(int b = 0; b < mp.length; b++) {
-            if(mp[a][b] > 0 && !vis[b]) {
-              hs.add(b);
-              flow[a][b] = mp[a][b];
-            }
-          }
-        }
-        for(int a : hs) {
-          if(!vis[a])
-            disc++;
-          vis[a] = true;
-          q.add(a);
-        }
-        if(vis[t]) {
-          break;
-        }
-      }
-      //System.out.println("disc : "+disc+" : "+vis[t]);
+      int[][] vis = new int[2][nodes];
+      Arrays.fill(vis[0], -1);
+      Arrays.fill(vis[1], Integer.MAX_VALUE);
       
-//
-//      for(int i = 0; i < flow.length; i++) {
-//        System.out.println(Arrays.toString(flow[i]));
-//      }
-      if(vis[t]) {
-        List<Integer> path = new ArrayList<Integer>();
-        path.add(s);
-        lastFlow = dinicFlowRecur(mp, flow, s, t, path);
-        totalFlow += lastFlow;
-        //System.out.println(lastFlow+" : "+totalFlow);
-      }
-      else {
-        break;
-      }
-      if(disc == 0 || lastFlow == 0)
-        break;
-    }
-    return totalFlow;
-  }
-  static int dinicFlowRecur(int[][] mp, int[][] flow, int curr, int t, List<Integer> paths) {
-    //System.out.println(curr);
-    int flowTotal = 0;
-    if(curr == t) {
-      if(paths.size() > 1) {
-        int min = Integer.MAX_VALUE;
-        for(int i = 1; i < paths.size(); i++) {
-          min = Math.min(min, flow[paths.get(i-1)][paths.get(i)]);
-        }
-        if(min > 0) {
-          for(int i = 1; i < paths.size(); i++) {
-            flow[paths.get(i-1)][paths.get(i)] -= min;
-            mp[paths.get(i-1)][paths.get(i)] -= min;
-            mp[paths.get(i)][paths.get(i-1)] += min;
+      q.add(s);
+      vis[0][s] = s;
+      while(q.size() > 0) {
+        int a = q.remove();
+        int min = vis[1][a];
+        if(a == t)
+          break;
+        for(int b = 0; b < nodes; b++) {
+          if(mp[a][b] > 0 && vis[0][b] == -1) {
+            q.add(b);
+            vis[0][b] = a;
+            vis[1][b] = Math.min(mp[a][b], min);
           }
-          return min;
         }
       }
-    }
-    else {
-      for(int i = 0; i < mp.length; i++) {
-        if(flow[curr][i] > 0) {
-          paths.add(i);
-          flowTotal += dinicFlowRecur(mp, flow, i, t, paths);
-          paths.remove((Integer)i);
-        }
+      
+      if(vis[0][t] == -1) {
+        break;
+      }
+      flow += vis[1][t];
+      int curr = t, min = vis[1][t];
+      while(curr != s) {
+        mp[vis[0][curr]][curr] -= min;
+        mp[curr][vis[0][curr]] += min;
+        curr = vis[0][curr];
       }
     }
-    return flowTotal;
+    return flow;
   }
+  
+  
+
+  private static void addEdge(int[][] mat, int[][] dat, int[][][] mp, int i, int j, int i1, int j1) {
+
+    if(dat[i1][j1] == 0 || dat[i][j] == 0)
+      return;
+    if(mp[i1][j1][0] == 0)
+      return;
+    int max = 100000000;
+    int s = mp[i][j][1], d = mp[i1][j1][0];
+    switch (dat[i1][j1]) {
+      case 2:
+        mat[s][d] = max;
+        break;
+      case 3:
+        mat[s][d] = max;
+        break;
+      case 4:
+        mat[s][d] = max;
+        break;
+      default:
+        break;
+    }
+  }
+
+
 
   public static class IntegerPair {
     int a;
